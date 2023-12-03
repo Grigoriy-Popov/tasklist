@@ -15,8 +15,8 @@ public interface TaskRepository {
 
     Task update(Task task);
 
-    boolean delete(Long taskId);
+    void delete(Long taskId);
 
-    void assignToUserById(Long taskId, Long userId);
+    boolean checkExistence(Long taskId);
 
 }

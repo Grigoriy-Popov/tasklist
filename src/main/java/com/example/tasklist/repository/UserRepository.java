@@ -21,4 +21,6 @@ public interface UserRepository {
 
     boolean isTaskOwner(Long userId, Long taskId);
 
+    boolean checkExistenceById(Long userId);
+
 }

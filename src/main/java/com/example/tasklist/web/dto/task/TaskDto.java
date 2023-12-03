@@ -24,10 +24,14 @@ public class TaskDto {
 
     @Size(max = 255, groups = {OnUpdate.class, OnCreate.class})
     private String description;
+
     private Status status;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.TIME)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime expirationDate;
+
+    @NotNull(message = "Users id must be not null", groups = {OnUpdate.class, OnCreate.class})
+    private Long userId;
 
 }
