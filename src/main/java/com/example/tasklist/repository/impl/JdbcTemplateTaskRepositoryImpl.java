@@ -16,9 +16,9 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
+@Repository("taskJdbcTemplateRepo")
 @RequiredArgsConstructor
-public class TaskRepositoryImpl implements TaskRepository, RowMapper<Task> {
+public class JdbcTemplateTaskRepositoryImpl implements TaskRepository, RowMapper<Task> {
 
     private final JdbcTemplate jdbcTemplate;
     private final String FIND_BY_ID = """
@@ -43,19 +43,14 @@ public class TaskRepositoryImpl implements TaskRepository, RowMapper<Task> {
             WHERE id = ?""";
 
     private final String CHECK_EXISTENCE = """
-            SELECT COUNT(1) FROM tasks
-            WHERE id = ?""";
-
-//    private final String CREATE = """
-//            INSERT INTO tasks (title, description, expiration_date, status, user_id)
-//            VALUES (?, ?, ?, ?, ?)""";
+            SELECT exists(
+            select 1 from tasks where id = ?)""";
 
     @Override
     public Task create(Task task) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName("tasks")
                 .usingGeneratedKeyColumns("id");
         task.setId(simpleJdbcInsert.executeAndReturnKey(task.toMap()).longValue());
-//        return jdbcTemplate.update(CREATE, this);
         return task;
     }
 
@@ -89,8 +84,11 @@ public class TaskRepositoryImpl implements TaskRepository, RowMapper<Task> {
 
     @Override
     public boolean checkExistence(Long taskId) {
-        int count = jdbcTemplate.queryForObject(CHECK_EXISTENCE, Integer.class, taskId);
-        return count != 0;
+        Integer count = jdbcTemplate.queryForObject(CHECK_EXISTENCE, Integer.class, taskId);
+        if (count != null) {
+            return count != 0;
+        }
+        return false;
     }
 
     @Override

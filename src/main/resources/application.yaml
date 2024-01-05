@@ -13,10 +13,10 @@ spring:
       continue-on-error: false
       data-locations: classpath:demo_data.sql
 #  liquibase:
-#    change-log: classpath:db/changelog/
+#    change-log: classpath:db/changelog/db.changelog-master.xml
 
 security:
   jwt:
     secret: cmdramVybGtqZ2xkZmthamdsa2FkZmpnbGo0aWo0aW9najQwOThnajQwdzlqZzIzLXI=
-    access: 3600000
-    refresh: 2592000000
+    access: 24
+    refresh: 730

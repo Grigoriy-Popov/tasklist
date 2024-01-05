@@ -61,11 +61,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean isTaskOwner(Long userId, Long taskId) {
-        return userRepository.isTaskOwner(userId, taskId);
-    }
-
-    @Override
     public boolean checkExistenceById(Long userId) {
         if (!userRepository.checkExistenceById(userId)) {
             throw new NotFoundException("User was not found");

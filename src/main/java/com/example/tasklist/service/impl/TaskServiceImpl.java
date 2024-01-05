@@ -5,7 +5,6 @@ import com.example.tasklist.model.task.Status;
 import com.example.tasklist.model.task.Task;
 import com.example.tasklist.repository.TaskRepository;
 import com.example.tasklist.service.TaskService;
-import com.example.tasklist.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -42,7 +41,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional
     public Task update(Task task) {
-        taskRepository.checkExistence(task.getId());
+        checkExistenceById(task.getId());
         if (task.getStatus() == null) {
             task.setStatus(Status.TODO);
         }
@@ -54,6 +53,13 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     public void delete(Long taskId) {
         taskRepository.delete(taskId);
+    }
+
+    @Override
+    public void checkExistenceById(Long taskId) {
+        if (!taskRepository.checkExistence(taskId)) {
+            throw new NotFoundException("Task was not found");
+        }
     }
 
 }

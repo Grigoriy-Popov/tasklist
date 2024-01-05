@@ -16,4 +16,5 @@ public interface TaskService {
 
     void delete(Long taskId);
 
+    void checkExistenceById(Long taskId);
 }

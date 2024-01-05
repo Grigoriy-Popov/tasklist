@@ -14,8 +14,6 @@ public interface UserService {
 
     void delete(Long userId);
 
-    boolean isTaskOwner(Long userId, Long taskId);
-
     boolean checkExistenceById(Long userId);
 
 }
