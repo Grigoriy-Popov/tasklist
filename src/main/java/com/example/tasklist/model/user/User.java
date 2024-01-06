@@ -25,7 +25,7 @@ public class User {
         Map<String, Object> user = new HashMap<>();
         user.put("name", name);
         user.put("username", username);
-        user.put("password", password);
+        user.put("password_hash", password);
         user.put("roles", roles);
         user.put("tasks", tasks);
         return user;

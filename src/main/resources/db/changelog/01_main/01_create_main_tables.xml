@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet id="01_create_users_table" author="gr.popov">
+        <preConditions onError="MARK_RAN">
+            <not>
+                <tableExists tableName="users"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="users">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="varchar(64)"/>
+            <column name="username" type="varchar(64)">
+                <constraints unique="true"/>
+            </column>
+            <column name="password_hash" type="varchar(256)"/>
+        </createTable>
+
+        <addAutoIncrement tableName="users" columnName="id" columnDataType="bigint"/>
+    </changeSet>
+
+    <changeSet id="02_create_tasks_table" author="gr.popov">
+        <preConditions onError="MARK_RAN">
+            <not>
+                <tableExists tableName="tasks"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="tasks">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="title" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)"/>
+            <column name="status" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expiration_date" type="timestamp" defaultValue="null"/>
+            <column name="user_id" type="bigint"/>
+        </createTable>
+
+        <addAutoIncrement tableName="tasks" columnName="id" columnDataType="bigint"/>
+
+        <addForeignKeyConstraint baseTableName="tasks" baseColumnNames="user_id" constraintName="fk_tasks_users"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="03_create_users_roles_table" author="gr.popov">
+        <preConditions onError="MARK_RAN">
+            <not>
+                <tableExists tableName="users_roles"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="users_roles">
+            <column name="user_id" type="bigint"/>
+            <column name="role" type="varchar(64)"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="users_roles" baseColumnNames="user_id" constraintName="fk_users-roles_users"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>

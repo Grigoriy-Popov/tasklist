@@ -35,10 +35,10 @@ public class JdbcTemplateTaskRepositoryImpl implements TaskRepository, RowMapper
 
     private final String UPDATE = """
             UPDATE tasks
-            SET title = ?
-            description = ?
-            expiration_date = ?
-            status = ?
+            SET title = ?,
+            description = ?,
+            expiration_date = ?,
+            status = ?,
             user_id = ?
             WHERE id = ?""";
 
@@ -73,7 +73,7 @@ public class JdbcTemplateTaskRepositoryImpl implements TaskRepository, RowMapper
     @Override
     public Task update(Task task) {
         jdbcTemplate.update(UPDATE, task.getTitle(), task.getDescription(), task.getExpirationDate(),
-                task.getStatus(), task.getUserId(), task.getId());
+                task.getStatus().toString(), task.getUserId(), task.getId());
         return task;
     }
 

@@ -40,15 +40,11 @@ public class JdbcTemplateUserRepositoryImpl implements UserRepository, RowMapper
             SELECT COUNT(1) FROM users
             WHERE id = ?""";
 
-    private final String CREATE = """
-            insert into users (name, username, password)
-            values (?, ?, ?)""";
-
     private final String UPDATE = """
             update users
             set name = ?,
             username = ?,
-            password = ?""";
+            password_hash = ?""";
 
     private final String INSERT_USER_ROLES = """
             insert into users_roles (user_id, role)
@@ -124,7 +120,7 @@ public class JdbcTemplateUserRepositoryImpl implements UserRepository, RowMapper
                 .id(rs.getLong("id"))
                 .name(rs.getString("name"))
                 .username(rs.getString("username"))
-                .password(rs.getString("password"))
+                .password(rs.getString("password_hash"))
                 .build();
         user.setRoles(getUserRoles(user.getId()));
         user.setTasks(taskService.getAllByUserId(user.getId()));

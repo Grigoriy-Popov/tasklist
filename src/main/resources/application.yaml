@@ -12,8 +12,8 @@ spring:
       mode: always
       continue-on-error: false
       data-locations: classpath:demo_data.sql
-#  liquibase:
-#    change-log: classpath:db/changelog/db.changelog-master.xml
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
 
 security:
   jwt:
