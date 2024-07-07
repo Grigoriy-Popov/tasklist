@@ -1,20 +1,59 @@
 package com.example.tasklist.service;
 
+import com.example.tasklist.exception.NotFoundException;
+import com.example.tasklist.model.task.Status;
 import com.example.tasklist.model.task.Task;
+import com.example.tasklist.repository.TaskRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-public interface TaskService {
+@Service
+@RequiredArgsConstructor
+public class TaskService {
 
-    Task create(Task task);
+    private final TaskRepository taskRepository;
 
-    Task getById(Long taskId);
+    @CachePut(value = "TaskService::getById", key = "#task.id")
+    public Task create(Task task) {
+        task.setStatus(Status.TODO);
+        taskRepository.create(task);
+        return task;
+    }
 
-    List<Task> getAllByUserId(Long userId);
+    @Cacheable(value = "TaskService::getByUsername", key = "#username")
+    public Task getById(Long taskId) {
+        return taskRepository.findById(taskId)
+                .orElseThrow(() -> new NotFoundException("Task was not found"));
+    }
 
-    Task update(Task task);
+    public List<Task> getAllByUserId(Long userId) {
+        return taskRepository.findAllByUserId(userId);
+    }
 
-    void delete(Long taskId);
+    @CachePut(value = "TaskService::getById", key = "#task.id")
+    public Task update(Task task) {
+        checkExistenceById(task.getId());
+        if (task.getStatus() == null) {
+            task.setStatus(Status.TODO);
+        }
+        taskRepository.update(task);
+        return task;
+    }
 
-    void checkExistenceById(Long taskId);
+    @CacheEvict(value = "TaskService::getById", key = "#taskId")
+    public void delete(Long taskId) {
+        taskRepository.delete(taskId);
+    }
+
+    public void checkExistenceById(Long taskId) {
+        if (!taskRepository.checkExistence(taskId)) {
+            throw new NotFoundException("Task was not found");
+        }
+    }
+
 }

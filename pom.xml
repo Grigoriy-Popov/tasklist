@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.2.0</version>
+		<version>3.2.4</version>
 		<relativePath/>
 	</parent>
 
@@ -22,6 +22,7 @@
 		<org.projectlombok>1.18.30</org.projectlombok>
 		<io.jsonwebtoken>0.12.3</io.jsonwebtoken>
 		<org.liquibase.version>4.25.0</org.liquibase.version>
+		<org.springdoc.version>2.3.0</org.springdoc.version>
 	</properties>
 
 	<dependencies>
@@ -48,6 +49,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
 		</dependency>
 
 		<dependency>
@@ -113,6 +119,11 @@
 			<version>${org.liquibase.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>${org.springdoc.version}</version>
+		</dependency>
 	</dependencies>
 
 	<build>
