@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet id="03.create_users_roles_table" author="gr.popov">
+        <preConditions onError="MARK_RAN">
+            <not>
+                <tableExists tableName="users_roles"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="users_roles">
+            <column name="user_id" type="bigint"/>
+            <column name="role" type="varchar(64)"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="users_roles" baseColumnNames="user_id" constraintName="fk_users-roles_users"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+
+        <loadData tableName="users_roles" relativeToChangelogFile="true" file="../data/users_roles.csv" separator=";"/>
+    </changeSet>
+</databaseChangeLog>

@@ -18,7 +18,7 @@ public class TaskDto {
     @NotNull(message = "Id must be not null", groups = OnUpdate.class)
     private Long id;
 
-    @NotBlank(message = "Name must be not null", groups = {OnUpdate.class, OnCreate.class})
+    @NotBlank(message = "Title must be not blank", groups = {OnUpdate.class, OnCreate.class})
     @Size(max = 255, groups = {OnUpdate.class, OnCreate.class})
     private String title;
 

@@ -25,10 +25,10 @@ public class TaskService {
         return task;
     }
 
-    @Cacheable(value = "TaskService::getByUsername", key = "#username")
+    @Cacheable(value = "TaskService::getById", key = "#taskId")
     public Task getById(Long taskId) {
         return taskRepository.findById(taskId)
-                .orElseThrow(() -> new NotFoundException("Task was not found"));
+                .orElseThrow(() -> new NotFoundException("Task with id %d was not found".formatted(taskId)));
     }
 
     public List<Task> getAllByUserId(Long userId) {
@@ -52,7 +52,7 @@ public class TaskService {
 
     public void checkExistenceById(Long taskId) {
         if (!taskRepository.checkExistence(taskId)) {
-            throw new NotFoundException("Task was not found");
+            throw new NotFoundException("Task with id %d was not found".formatted(taskId));
         }
     }
 

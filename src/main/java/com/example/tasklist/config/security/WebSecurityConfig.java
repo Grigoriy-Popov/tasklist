@@ -51,12 +51,12 @@ public class WebSecurityConfig {
                 .cors(CorsConfigurer::disable)
                 .httpBasic(HttpBasicConfigurer::disable)
                 .anonymous(AnonymousConfigurer::disable)
-                .headers(configurer -> configurer.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+                .headers(headersConfigurer -> headersConfigurer.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .sessionManagement(smc -> smc.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ehc -> ehc.authenticationEntryPoint(authEntryPoint))
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
-                .authorizeHttpRequests(configurer ->
-                        configurer.requestMatchers("/auth/**").permitAll()
+                .authorizeHttpRequests(httpRequestConfigurer ->
+                        httpRequestConfigurer.requestMatchers("/auth/**").permitAll()
                                 .requestMatchers("/h2-console/**").permitAll()
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("/v3/api-docs/**").permitAll()

@@ -6,6 +6,7 @@ import com.example.tasklist.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -21,13 +22,6 @@ import java.util.Optional;
 public class JdbcTemplateTaskRepositoryImpl implements TaskRepository, RowMapper<Task> {
 
     private final JdbcTemplate jdbcTemplate;
-    private final String FIND_BY_ID = """
-            SELECT * FROM tasks
-            WHERE id = ?""";
-
-    private final String FIND_ALL_BY_USER_ID = """
-            SELECT * FROM tasks
-            WHERE user_id = ?""";
 
     private final String DELETE = """
             DELETE FROM tasks
@@ -58,7 +52,10 @@ public class JdbcTemplateTaskRepositoryImpl implements TaskRepository, RowMapper
     public Optional<Task> findById(Long taskId) {
         Task task;
         try {
-            task = jdbcTemplate.queryForObject(FIND_BY_ID, this, taskId);
+            String findById = """
+                    SELECT * FROM tasks
+                    WHERE id = ?""";
+            task = jdbcTemplate.queryForObject(findById, this, taskId);
         } catch (EmptyResultDataAccessException e) {
             task = null;
         }
@@ -67,7 +64,11 @@ public class JdbcTemplateTaskRepositoryImpl implements TaskRepository, RowMapper
 
     @Override
     public List<Task> findAllByUserId(Long userId) {
-        return jdbcTemplate.query(FIND_ALL_BY_USER_ID, this, userId);
+        String findAllByUserId = """
+                SELECT * FROM tasks
+                WHERE user_id = ?""";
+//        return jdbcTemplate.query(FIND_ALL_BY_USER_ID, this, userId);
+        return jdbcTemplate.query(findAllByUserId, new BeanPropertyRowMapper<>(Task.class), userId);
     }
 
     @Override
@@ -79,6 +80,7 @@ public class JdbcTemplateTaskRepositoryImpl implements TaskRepository, RowMapper
 
     @Override
     public void delete(Long taskId) {
+        String delete = "delete from "
         jdbcTemplate.update(DELETE, taskId);
     }
 

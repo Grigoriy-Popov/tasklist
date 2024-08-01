@@ -19,6 +19,7 @@
 		<java.version>17</java.version>
 		<org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
 		<com.h2database>2.2.224</com.h2database>
+		<org.postgresql>42.7.3</org.postgresql>
 		<org.projectlombok>1.18.30</org.projectlombok>
 		<io.jsonwebtoken>0.12.3</io.jsonwebtoken>
 		<org.liquibase.version>4.25.0</org.liquibase.version>
@@ -34,11 +35,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jdbc</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-jooq</artifactId>
 		</dependency>
 
 		<dependency>
@@ -86,6 +82,12 @@
 			<artifactId>h2</artifactId>
 			<version>${com.h2database}</version>
 			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>${org.postgresql}</version>
 		</dependency>
 
 		<dependency>

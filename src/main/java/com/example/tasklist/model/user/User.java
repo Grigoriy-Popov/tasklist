@@ -1,8 +1,10 @@
 package com.example.tasklist.model.user;
 
 import com.example.tasklist.model.task.Task;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -12,6 +14,8 @@ import java.util.Set;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class User implements Serializable {
 
     private Long id;

@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -55,6 +56,7 @@ public class JdbcTemplateUserRepositoryImpl implements UserRepository, RowMapper
             WHERE id = ?""";
 
     @Override
+    @Transactional
     public User create(User user) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName("users")
                 .usingGeneratedKeyColumns("id");
@@ -69,7 +71,7 @@ public class JdbcTemplateUserRepositoryImpl implements UserRepository, RowMapper
         try {
             user = jdbcTemplate.queryForObject(FIND_BY_ID, this, userId);
         } catch (EmptyResultDataAccessException e) {
-            user = null;
+            return Optional.empty();
         }
         return Optional.ofNullable(user);
     }
@@ -80,7 +82,7 @@ public class JdbcTemplateUserRepositoryImpl implements UserRepository, RowMapper
         try {
             user = jdbcTemplate.queryForObject(FIND_BY_USERNAME, this, username);
         } catch (EmptyResultDataAccessException e) {
-            user = null;
+            return Optional.empty();
         }
         return Optional.ofNullable(user);
     }

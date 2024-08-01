@@ -26,11 +26,11 @@ public class UserService {
             @CachePut(value = "UserService::getByUsername", key = "#user.username")
     })
     public User create(User user) {
-        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            throw new IllegalStateException("User with this username is already exists");
-        }
         if (!user.getPassword().equals(user.getPasswordConfirmation())) {
             throw new IllegalStateException("Password and password confirmation do not match.");
+        }
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            throw new IllegalStateException("User with this username is already exists");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         Set<Role> roles = Set.of(Role.ROLE_USER);
@@ -42,13 +42,13 @@ public class UserService {
     @Cacheable(value = "UserService::getById", key = "#userId")
     public User getById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User was not found"));
+                .orElseThrow(() -> new NotFoundException("User with id %d was not found".formatted(userId)));
     }
 
     @Cacheable(value = "UserService::getByUsername", key = "#username")
     public User getByUsername(String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new NotFoundException("User was not found"));
+                .orElseThrow(() -> new NotFoundException("User with username %s was not found".formatted(username)));
     }
 
     @Caching(put = {
@@ -68,7 +68,7 @@ public class UserService {
 
     public boolean checkExistenceById(Long userId) {
         if (!userRepository.checkExistenceById(userId)) {
-            throw new NotFoundException("User was not found");
+            throw new NotFoundException("User with id %d was not found".formatted(userId));
         }
         return true;
     }
