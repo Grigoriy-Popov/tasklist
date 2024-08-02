@@ -13,36 +13,21 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
-@Repository("taskJdbcTemplateRepo")
+@Repository
 @RequiredArgsConstructor
-public class JdbcTemplateTaskRepositoryImpl implements TaskRepository, RowMapper<Task> {
+public class JdbcTemplateTaskRepository implements TaskRepository, RowMapper<Task> {
 
     private final JdbcTemplate jdbcTemplate;
 
-    private final String DELETE = """
-            DELETE FROM tasks
-            WHERE id = ?""";
-
-    private final String UPDATE = """
-            UPDATE tasks
-            SET title = ?,
-            description = ?,
-            expiration_date = ?,
-            status = ?,
-            user_id = ?
-            WHERE id = ?""";
-
-    private final String CHECK_EXISTENCE = """
-            SELECT exists(
-            select 1 from tasks where id = ?)""";
-
     @Override
     public Task create(Task task) {
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName("tasks")
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("tasks")
                 .usingGeneratedKeyColumns("id");
         task.setId(simpleJdbcInsert.executeAndReturnKey(task.toMap()).longValue());
         return task;
@@ -50,12 +35,10 @@ public class JdbcTemplateTaskRepositoryImpl implements TaskRepository, RowMapper
 
     @Override
     public Optional<Task> findById(Long taskId) {
+        String sql = "select * from tasks where id = ?";
         Task task;
         try {
-            String findById = """
-                    SELECT * FROM tasks
-                    WHERE id = ?""";
-            task = jdbcTemplate.queryForObject(findById, this, taskId);
+            task = jdbcTemplate.queryForObject(sql, new BeanPropertyRowMapper<>(Task.class), taskId);
         } catch (EmptyResultDataAccessException e) {
             task = null;
         }
@@ -64,38 +47,41 @@ public class JdbcTemplateTaskRepositoryImpl implements TaskRepository, RowMapper
 
     @Override
     public List<Task> findAllByUserId(Long userId) {
-        String findAllByUserId = """
-                SELECT * FROM tasks
-                WHERE user_id = ?""";
+        String sql = "SELECT * FROM tasks WHERE user_id = ?";
 //        return jdbcTemplate.query(FIND_ALL_BY_USER_ID, this, userId);
-        return jdbcTemplate.query(findAllByUserId, new BeanPropertyRowMapper<>(Task.class), userId);
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Task.class), userId);
     }
 
     @Override
     public Task update(Task task) {
-        jdbcTemplate.update(UPDATE, task.getTitle(), task.getDescription(), task.getExpirationDate(),
+        String sql = "UPDATE tasks " +
+                "SET title = ?, " +
+                "description = ?," +
+                "expiration_date = ?, " +
+                "status = ?," +
+                "user_id = ? " +
+                "WHERE id = ?";
+        jdbcTemplate.update(sql, task.getTitle(), task.getDescription(), task.getExpirationDate(),
                 task.getStatus().toString(), task.getUserId(), task.getId());
         return task;
     }
 
     @Override
     public void delete(Long taskId) {
-        String delete = "delete from "
-        jdbcTemplate.update(DELETE, taskId);
+        String sql = "delete from tasks where id = ?";
+        jdbcTemplate.update(sql, taskId);
     }
 
     @Override
     public boolean checkExistence(Long taskId) {
-        Integer count = jdbcTemplate.queryForObject(CHECK_EXISTENCE, Integer.class, taskId);
-        if (count != null) {
-            return count != 0;
-        }
-        return false;
+        String sql = "select exists(select 1 from tasks where id = ?)";
+        int count = jdbcTemplate.queryForObject(sql, Integer.class, taskId);
+        return count != 0;
     }
 
     @Override
     @SneakyThrows
-    public Task mapRow(ResultSet rs, int rowNum) {
+    public Task mapRow(ResultSet rs, int rowNum) throws SQLException {
         Timestamp timestamp = rs.getTimestamp("expiration_date");
         return Task.builder()
                 .id(rs.getLong("id"))
@@ -106,5 +92,4 @@ public class JdbcTemplateTaskRepositoryImpl implements TaskRepository, RowMapper
                 .userId(rs.getLong("user_id"))
                 .build();
     }
-
 }

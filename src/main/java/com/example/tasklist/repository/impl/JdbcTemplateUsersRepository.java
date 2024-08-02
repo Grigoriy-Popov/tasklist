@@ -2,8 +2,8 @@ package com.example.tasklist.repository.impl;
 
 import com.example.tasklist.model.user.Role;
 import com.example.tasklist.model.user.User;
+import com.example.tasklist.repository.TaskRepository;
 import com.example.tasklist.repository.UserRepository;
-import com.example.tasklist.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -14,46 +14,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-@Repository("userJdbcTemplateRepo")
+@Repository
 @RequiredArgsConstructor
-public class JdbcTemplateUserRepositoryImpl implements UserRepository, RowMapper<User> {
+public class JdbcTemplateUsersRepository implements UserRepository, RowMapper<User> {
 
     private final JdbcTemplate jdbcTemplate;
-    private final TaskService taskService;
-
-    private final String FIND_BY_USERNAME = """
-            SELECT * FROM users WHERE username LIKE ?""";
-
-    private final String FIND_BY_ID = """
-            SELECT * FROM users
-            WHERE id = ?""";
-
-    private final String GET_USER_ROLES = """
-            SELECT role FROM users_roles
-            WHERE user_id = ?""";
-
-    private final String CHECK_EXISTENCE_BY_ID = """
-            SELECT COUNT(1) FROM users
-            WHERE id = ?""";
-
-    private final String UPDATE = """
-            update users
-            set name = ?,
-            username = ?,
-            password_hash = ?""";
-
-    private final String INSERT_USER_ROLES = """
-            insert into users_roles (user_id, role)
-            values (?, ?)""";
-
-    private final String DELETE = """
-            DELETE FROM users
-            WHERE id = ?""";
+    private final TaskRepository taskRepository;
 
     @Override
     @Transactional
@@ -69,7 +39,8 @@ public class JdbcTemplateUserRepositoryImpl implements UserRepository, RowMapper
     public Optional<User> findById(Long userId) {
         User user;
         try {
-            user = jdbcTemplate.queryForObject(FIND_BY_ID, this, userId);
+            String sql = "SELECT * FROM users WHERE id = ?";
+            user = jdbcTemplate.queryForObject(sql, this, userId);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
@@ -80,7 +51,8 @@ public class JdbcTemplateUserRepositoryImpl implements UserRepository, RowMapper
     public Optional<User> findByUsername(String username) {
         User user;
         try {
-            user = jdbcTemplate.queryForObject(FIND_BY_USERNAME, this, username);
+            String sql = "SELECT * FROM users WHERE username = ?";
+            user = jdbcTemplate.queryForObject(sql, this, username);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
@@ -89,30 +61,30 @@ public class JdbcTemplateUserRepositoryImpl implements UserRepository, RowMapper
 
     @Override
     public User update(User user) {
-        jdbcTemplate.update(UPDATE, user.getName(), user.getUsername(), user.getPassword());
+        String sql = "update users " +
+                "set name = ?, " +
+                "username = ?, " +
+                "password_hash = ?";
+        jdbcTemplate.update(sql, user.getName(), user.getUsername(), user.getPassword());
         return user;
     }
 
     @Override
     public boolean delete(Long userId) {
-        return jdbcTemplate.update(DELETE, userId) != 1;
+        String sql = "delete from users where id = ?";
+        return jdbcTemplate.update(sql, userId) != 1;
     }
 
     @Override
     public void insertUserRole(Long userId, Role role) {
-        jdbcTemplate.update(INSERT_USER_ROLES, userId, role.name());
-    }
-
-    private Set<Role> getUserRoles(Long userId) {
-        List<Role> roles = jdbcTemplate.queryForList(GET_USER_ROLES, String.class, userId).stream()
-                .map(Role::valueOf)
-                .toList();
-        return new HashSet<>(roles);
+        String sql = "insert into users_roles (user_id, role) values (?, ?)";
+        jdbcTemplate.update(sql, userId, role.name());
     }
 
     @Override
     public boolean checkExistenceById(Long userId) {
-        int count = jdbcTemplate.queryForObject(CHECK_EXISTENCE_BY_ID, Integer.class, userId);
+        String sql = "SELECT COUNT(1) FROM users WHERE id = ?";
+        int count = jdbcTemplate.queryForObject(sql, Integer.class, userId);
         return count != 0;
     }
 
@@ -125,8 +97,15 @@ public class JdbcTemplateUserRepositoryImpl implements UserRepository, RowMapper
                 .password(rs.getString("password_hash"))
                 .build();
         user.setRoles(getUserRoles(user.getId()));
-        user.setTasks(taskService.getAllByUserId(user.getId()));
+        user.setTasks(taskRepository.findAllByUserId(user.getId()));
         return user;
+    }
+
+    private Set<Role> getUserRoles(Long userId) {
+        String sql = "SELECT role FROM users_roles WHERE user_id = ?";
+        return jdbcTemplate.queryForList(sql, String.class, userId).stream()
+                .map(Role::valueOf)
+                .collect(Collectors.toSet());
     }
 
 }
